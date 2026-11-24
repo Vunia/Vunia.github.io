@@ -330,7 +330,28 @@ main { position: relative; }
 
 /* the "Capri says" sign and the billboard hang off the buildings */
 .board::after { content: ""; position: absolute; left: 100%; top: 26px; width: 60vw; height: 10px; background: #24123f; z-index: -1; box-shadow: 0 30px 0 #24123f; }
-.billboard::before, .billboard::after { content: ""; position: absolute; top: 40px; width: 60vw; height: 26px; z-index: -1;
-  background: repeating-linear-gradient(60deg, #24123f 0 3px, transparent 3px 22px), repeating-linear-gradient(-60deg, #24123f 0 3px, transparent 3px 22px); border-top: 4px solid #24123f; border-bottom: 4px solid #24123f; }
-.billboard::before { right: 100%; } .billboard::after { left: 100%; }
+.billboard::before, .billboard::after { content: ""; position: absolute; top: 100%; width: 18px; height: var(--legs, 80px); background: #24123f; z-index: -1; }
+.billboard::before { left: 14%; } .billboard::after { right: 14%; }
 @media (max-width: 760px) { .vsign, .tank, .dish { display: none; } .ac, .mini-sign, .vent { display: none; } }
+
+/* the lower city around the dock: low rooftops behind, a terrace railing, the low building below */
+.lowrow { position: absolute; left: 0; right: 0; }
+.lowrow svg { display: block; }
+.facade { position: absolute; left: 0; right: 0; background-color: #4b3399; }
+.facade::before { content: ""; position: absolute; inset: 0; background: var(--tile) 0 0 / 260px auto repeat; opacity: .55; }
+.facade::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 10px; background: #24123f; }
+.facade .deco { position: absolute; }
+.facade .ac { width: 30px; height: 20px; }
+.stair { position: absolute; left: clamp(40px, 6vw, 120px); top: 10px; bottom: 0; width: 46px; z-index: 1;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='90'%3E%3Cline x1='2' y1='0' x2='44' y2='45' stroke='%2324123f' stroke-width='4'/%3E%3Cline x1='44' y1='45' x2='2' y2='90' stroke='%2324123f' stroke-width='4'/%3E%3Crect x='0' y='0' width='46' height='3' fill='%2324123f'/%3E%3Crect x='0' y='43' width='46' height='3' fill='%2324123f'/%3E%3Crect x='0' y='0' width='3' height='90' fill='%2324123f'/%3E%3Crect x='43' y='0' width='3' height='90' fill='%2324123f'/%3E%3C/svg%3E") repeat-y; }
+.terrace-rail { position: absolute; left: 0; right: 0; height: 34px;
+  background: linear-gradient(#24123f, #24123f) 0 0 / 100% 4px no-repeat, repeating-linear-gradient(90deg, #24123f 0 3px, transparent 3px 26px); border-bottom: 6px solid #24123f; }
+.roofdoor { position: absolute; right: clamp(60px, 13vw, 240px); width: 64px; height: 84px; background: #24123f; clip-path: polygon(0 12%, 100% 0, 100% 100%, 0 100%); }
+.roofdoor i { position: absolute; left: 18px; top: 26px; width: 24px; height: 58px; background: #ffe27a; opacity: .85; }
+.roofdoor::after { content: ""; position: absolute; left: 26px; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: #fff3b0; box-shadow: 0 0 10px #fff3b0; }
+.plant { position: absolute; left: clamp(46px, 10vw, 200px); width: 40px; height: 46px;
+  background: linear-gradient(#24123f, #24123f) 50% 100% / 26px 16px no-repeat; }
+.plant::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 32px; background: #3e7a52; clip-path: polygon(50% 0, 62% 30%, 100% 10%, 72% 50%, 100% 70%, 60% 66%, 50% 100%, 40% 66%, 0 70%, 28% 50%, 0 10%, 38% 30%); }
+.rooftank { position: absolute; left: clamp(90px, 18vw, 330px); width: 54px; height: 70px; background: #24123f;
+  clip-path: polygon(0 22%, 50% 0, 100% 22%, 100% 78%, 88% 78%, 88% 100%, 80% 100%, 80% 78%, 20% 78%, 20% 100%, 12% 100%, 12% 78%, 0 78%); }
+@media (max-width: 760px) { .roofdoor, .rooftank { display: none; } .stair { left: 6px; width: 30px; } }

@@ -60,11 +60,42 @@ colR.style.setProperty('--tile', svgURI(facade(120, 960, ['#ffe27a', '#4ce0ff', 
 colL.style.setProperty('--tile', svgURI(facade(120, 840, ['#ffe27a', '#4ce0ff', '#ff7ab8'], 23)));
 
 const sec = id => document.getElementById(id);
+
+// ---------------------------------------------------------------- the lower city: a rooftop terrace at the dock, the low building below it
+const NS = 'http://www.w3.org/2000/svg';
+const lowRow = document.createElement('div'); lowRow.className = 'lowrow'; world.appendChild(lowRow);
+const front = document.createElement('div'); front.className = 'facade';
+front.style.setProperty('--tile', svgURI(facade(120, 600, ['#ffe27a', '#4ce0ff', '#ff7ab8'], 37)));
+front.innerHTML = '<i class="stair"></i><i class="deco mini-sign" style="--n:#00E86E;left:14%;top:22%">BAR</i><i class="deco ac" style="right:22%;top:16%"></i><i class="deco ac" style="left:40%;top:46%"></i><i class="deco mini-sign" style="--n:#FFD23F;right:9%;top:40%">OPEN LATE</i>';
+world.appendChild(front);
+const railing = document.createElement('div'); railing.className = 'terrace-rail'; world.appendChild(railing);
+const door = document.createElement('div'); door.className = 'roofdoor'; door.innerHTML = '<i></i>'; world.appendChild(door);
+const plant = document.createElement('div'); plant.className = 'plant'; world.appendChild(plant);
+const tank2 = document.createElement('div'); tank2.className = 'rooftank'; world.appendChild(tank2);
+function lowCity(W, H) {
+  seed = 57;
+  let s = `<svg xmlns="${NS}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
+  let x = -10;
+  while (x < W + 10) {
+    const w = 44 + rnd() * 80, h = H * (.3 + rnd() * .62), t = H - h, c = rnd() < .5 ? '#6a4fc2' : '#5e43b8';
+    s += `<rect x="${x}" y="${t}" width="${w}" height="${h}" fill="${c}"/><rect x="${x + w * .64}" y="${t}" width="${w * .36}" height="${h}" fill="#000" opacity=".16"/>`;
+    for (let y = t + 26; y < H; y += 30) s += `<rect x="${x}" y="${y}" width="${w}" height="3" fill="#24123f" opacity=".35"/>`;
+    for (let y = t + 12; y < H - 6; y += 13) for (let xx = x + 6; xx < x + w - 8; xx += 11) {
+      const q = rnd(); if (q < .3) s += `<rect x="${xx | 0}" y="${y | 0}" width="5" height="7" fill="${q < .2 ? '#ffe27a' : q < .27 ? '#4ce0ff' : '#ff7ab8'}"/>`;
+    }
+    const r = rnd();
+    if (r < .3) s += `<rect x="${x + w * .2}" y="${t - 26}" width="24" height="26" fill="#24123f"/><polygon points="${x + w * .2 - 3},${t - 26} ${x + w * .2 + 12},${t - 36} ${x + w * .2 + 27},${t - 26}" fill="#24123f"/>`;
+    else if (r < .55) s += `<line x1="${x + w * .6}" y1="${t}" x2="${x + w * .6}" y2="${t - 40}" stroke="#24123f" stroke-width="3"/><circle cx="${x + w * .6}" cy="${t - 42}" r="4" fill="#FF0046" class="blink"/>`;
+    else if (r < .7) s += `<rect x="${x + 8}" y="${t - 18}" width="${Math.min(w - 16, 54)}" height="16" fill="#24123f"/><rect x="${x + 11}" y="${t - 15}" width="${Math.min(w - 22, 48)}" height="10" fill="${rnd() < .5 ? '#FF5FD2' : '#4CE0FF'}" class="flick"/>`;
+    x += w + 2 + rnd() * 10;
+  }
+  return s + '</svg>';
+}
 // things stuck to the buildings: [building, kind, section, fraction down it, label, neon colour]
 const DECO = [
   [colR, 'ac', 'talk', .15], [colR, 'mini-sign', 'talk', .55, '24/7', '#4CE0FF'], [colR, 'ac', 'listen', .3], [colR, 'vent', 'listen', .78],
-  [colR, 'mini-sign', 'dock', .12, 'HOTEL', '#FF5FD2'], [colR, 'ac', 'dock', .75], [colR, 'ac', 'street', .3],
-  [colL, 'ac', 'listen', .15], [colL, 'mini-sign', 'listen', .62, 'RAMEN', '#FFD23F'], [colL, 'ac', 'dock', .5], [colL, 'mini-sign', 'street', .25, 'BAR', '#00E86E'],
+  [colR, 'mini-sign', 'dock', .08, 'HOTEL', '#FF5FD2'],
+  [colL, 'ac', 'listen', .15], [colL, 'mini-sign', 'listen', .62, 'RAMEN', '#FFD23F'],
 ];
 const decoEls = DECO.map(([col, kind, , , label, n]) => {
   const d = document.createElement('i'); d.className = 'deco ' + kind;
@@ -76,7 +107,7 @@ const WIRES = [
   ['hero', .8, 70, 'edge'], ['hero', .86, 40, 'edge'],
   ['talk', .31, 90, 'l'], ['talk', .35, 55, 'l'],
   ['dock', -.03, 80, 'l', { sign: 'LIVE', n: '#FF0046' }],
-  ['street', .2, 70, 'l', { bulbs: true }], ['street', .24, 40, 'l'],
+  ['street', .2, 60, 'span', { bulbs: true }], ['street', .23, 36, 'span'],
 ];
 const wireEls = WIRES.map(() => {
   const w = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); w.setAttribute('class', 'wire');
@@ -89,11 +120,20 @@ function layout() {
   const ground = street.offsetTop + walk.offsetTop + 26;            // where the buildings stand
   const roofR = hero.offsetTop + hero.offsetHeight * (innerWidth < 760 ? .72 : .6);
   const roofL = talk.offsetTop + talk.offsetHeight * .3;
-  colR.style.top = roofR + 'px'; colR.style.height = ground - roofR + 'px';
-  colL.style.top = roofL + 'px'; colL.style.height = ground - roofL + 'px';
-  const esc = colL.querySelector('.escape');
-  esc.style.top = (sec('listen').offsetTop - roofL + 80) + 'px';
-  esc.style.height = Math.max(0, street.offsetTop + street.offsetHeight * .45 - sec('listen').offsetTop - 80) + 'px';
+  // the towers stop at the dock's rooftop terrace; below it is the low building the shops are in
+  const dock = sec('dock'), terrace = dock.offsetTop + dock.offsetHeight - 40;
+  colR.style.top = roofR + 'px'; colR.style.height = terrace - roofR + 'px';
+  colL.style.top = roofL + 'px'; colL.style.height = terrace - roofL + 'px';
+  const esc = colL.querySelector('.escape'), escTop = sec('listen').offsetTop - roofL + 80;
+  esc.style.top = escTop + 'px'; esc.style.height = Math.max(0, terrace - roofL - escTop - 200) + 'px';
+  const W0 = world.clientWidth, LH = Math.round(Math.min(300, Math.max(180, innerHeight * .32)));
+  if (lowRow.dataset.w !== W0 + 'x' + LH) { lowRow.innerHTML = lowCity(W0, LH); lowRow.dataset.w = W0 + 'x' + LH; }
+  lowRow.style.top = terrace - LH + 'px'; lowRow.style.height = LH + 'px';
+  front.style.top = terrace + 'px'; front.style.height = ground - terrace + 'px';
+  railing.style.top = terrace - 34 + 'px';
+  door.style.top = terrace - 84 + 'px'; plant.style.top = terrace - 46 + 'px'; tank2.style.top = terrace - 70 + 'px';
+  const bb = $('.billboard');
+  if (bb) { const b = bb.getBoundingClientRect().bottom + scrollY - (world.getBoundingClientRect().top + scrollY); bb.style.setProperty('--legs', Math.max(0, terrace - b) + 'px'); }
 
   DECO.forEach(([col, , id, f], i) => {
     const s = sec(id), y = s.offsetTop + s.offsetHeight * f - parseFloat(col.style.top);
@@ -104,7 +144,7 @@ function layout() {
   const W = world.clientWidth, lR = colR.offsetLeft, lL = colL.offsetLeft + colL.offsetWidth;
   WIRES.forEach(([id, f, sag, from, extra], i) => {
     const s = sec(id), y = s.offsetTop + s.offsetHeight * f;
-    const x1 = from === 'edge' ? -10 : lL, x2 = lR, w = x2 - x1;
+    const x1 = from === 'l' ? lL : -10, x2 = from === 'span' ? W + 10 : lR, w = x2 - x1;
     const el = wireEls[i];
     el.style.left = x1 + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.height = sag + 4 + 'px';
     el.setAttribute('viewBox', `0 0 ${w} ${sag + 4}`);
