@@ -3,288 +3,408 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Claude Dock · a desktop companion for Claude Code</title>
-<meta name="description" content="Claude Dock: a Windows dock and voice companion for Claude Code. Talk to Claude, hear what it finished, and keep your chats one click away. Built with Claude Code.">
+<title>Claude Dock · talk to Claude Code, hear when it's done</title>
+<meta name="description" content="Claude Dock: a Windows dock and voice companion for Claude Code, built with Claude Code.">
 <meta property="og:title" content="Claude Dock">
 <meta property="og:description" content="A Windows dock and voice companion for Claude Code, built with Claude Code.">
 <link rel="preload" href="assets/capri/idle.png" as="image">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="scan" aria-hidden="true"></div>
 
-<header class="nav">
-  <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>claude_dock</a>
-  <nav>
-    <a href="#voice">voice</a>
-    <a href="#reads">reads</a>
-    <a href="#dock">dock</a>
-    <a href="#more">more</a>
-    <a href="#built">built</a>
-  </nav>
-  <button class="sound" id="soundBtn" aria-pressed="false" title="Let Capri talk out loud (uses your browser's voice)">
+<!-- shared art: her hair's sparkle, used on a few shapes -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="spark" width="90" height="90" patternUnits="userSpaceOnUse">
+      <circle cx="7" cy="11" r="1.4" fill="#fff"/><circle cx="31" cy="4" r=".9" fill="#fff"/><circle cx="52" cy="22" r="1.6" fill="#fff"/>
+      <circle cx="76" cy="9" r="1" fill="#fff"/><circle cx="18" cy="38" r="1" fill="#fff"/><circle cx="44" cy="47" r="1.3" fill="#fff"/>
+      <circle cx="69" cy="40" r=".8" fill="#fff"/><circle cx="85" cy="58" r="1.4" fill="#fff"/><circle cx="9" cy="66" r="1.1" fill="#fff"/>
+      <circle cx="35" cy="73" r="1.6" fill="#fff"/><circle cx="58" cy="81" r="1" fill="#fff"/><circle cx="80" cy="85" r=".9" fill="#fff"/>
+      <rect x="25" y="57" width="2" height="2" fill="#fff"/><rect x="62" y="64" width="2" height="2" fill="#fff"/>
+    </pattern>
+  </defs>
+</svg>
+
+<header class="top">
+  <a class="brand" href="#hero"><span class="brand-mark" aria-hidden="true"></span>claude_dock</a>
+  <button class="sound" id="soundBtn" aria-pressed="false" title="Let Capri talk out loud (your browser's voice)">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="w" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
     <span>sound off</span>
   </button>
 </header>
 
-<main id="top">
+<nav class="rail" id="rail" aria-label="Sections">
+  <a href="#hero" data-for="hero"><span>start</span></a>
+  <a href="#talk" data-for="talk"><span>talk</span></a>
+  <a href="#listen" data-for="listen"><span>listen</span></a>
+  <a href="#dock" data-for="dock"><span>the dock</span></a>
+  <a href="#street" data-for="street"><span>her life</span></a>
+  <a href="#built" data-for="built"><span>built</span></a>
+</nav>
 
-<!-- ============================================================ HERO -->
-<section class="hero">
+<!-- Capri: one of her, everywhere. Her ribbons are drawn on a layer over the page. -->
+<canvas id="capri" class="capri-main" aria-hidden="true"></canvas>
+<div id="capriPad" class="capri-pad" role="button" tabindex="0" aria-label="Capri. Click to poke her, drag to move her."></div>
+<div id="capriBubble" class="bubble"></div>
+<canvas id="ribbons" class="ribbons" aria-hidden="true"></canvas>
+
+<main>
+
+<!-- ============================================================ HERO: the skyline -->
+<section class="sec hero" id="hero">
+  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <g data-depth=".05">
+      <polygon points="930,170 1090,96 1190,230 1120,330 990,320 900,250" fill="#FFF3E4"/>
+      <polygon points="930,170 1090,96 1190,230 1120,330 990,320 900,250" fill="url(#spark)" opacity=".55"/>
+      <polygon points="1200,140 1250,120 1262,170 1222,182" fill="#FFE4CC"/>
+      <polygon points="860,120 890,100 900,140" fill="#FFE4CC"/>
+      <polygon points="1170,330 1240,310 1230,360" fill="#FFE4CC"/>
+    </g>
+    <g data-depth=".12">
+      <polygon fill="#CDB6F6" points="0,560 40,520 60,540 100,470 130,520 180,500 200,430 240,460 260,520 320,500 350,420 380,470 420,450 460,520 520,480 560,400 590,450 640,440 680,500 740,470 780,410 820,470 880,450 920,500 980,460 1020,420 1060,480 1110,460 1160,410 1200,470 1260,450 1300,500 1360,430 1400,480 1440,460 1440,900 0,900"/>
+    </g>
+    <g data-depth=".22">
+      <polygon fill="#A98CEB" points="0,640 0,540 60,520 70,470 120,470 125,540 170,560 200,500 205,430 225,400 250,430 255,560 300,580 330,520 380,520 385,600 440,600 460,490 520,470 530,600 600,620 620,540 680,540 690,610 760,620 790,520 800,450 830,420 860,450 870,600 940,600 960,540 1020,540 1030,620 1100,620 1110,520 1170,500 1180,620 1260,610 1270,540 1320,530 1330,600 1440,590 1440,900 0,900"/>
+      <g fill="#FFF4B8" opacity=".8">
+        <rect x="80" y="490" width="8" height="10"/><rect x="100" y="510" width="8" height="10"/><rect x="215" y="450" width="6" height="10"/><rect x="232" y="480" width="6" height="10"/>
+        <rect x="475" y="510" width="8" height="10"/><rect x="500" y="540" width="8" height="10"/><rect x="812" y="470" width="6" height="10"/><rect x="840" y="500" width="6" height="10"/>
+        <rect x="1125" y="540" width="8" height="10"/><rect x="1150" y="560" width="8" height="10"/><rect x="1285" y="560" width="8" height="10"/>
+      </g>
+      <line x1="225" y1="400" x2="225" y2="340" stroke="#6A47C9" stroke-width="3"/><circle cx="225" cy="338" r="4" fill="#FF0046" class="blink"/>
+      <line x1="830" y1="420" x2="830" y2="350" stroke="#6A47C9" stroke-width="3"/><circle cx="830" cy="348" r="4" fill="#FF0046" class="blink d2"/>
+    </g>
+    <g data-depth=".35"><g transform="translate(560 120)">
+      <polygon fill="#6A47C9" points="0,900 0,620 50,600 60,560 140,560 150,620 210,640 220,900"/>
+      <polygon fill="#5A3BB5" points="220,900 220,680 260,660 330,660 360,700 360,900"/>
+      <g fill="#FFE27A"><rect x="30" y="650" width="10" height="14"/><rect x="70" y="620" width="10" height="14"/><rect x="110" y="680" width="10" height="14"/><rect x="160" y="700" width="10" height="14"/><rect x="250" y="720" width="10" height="14"/><rect x="300" y="700" width="10" height="14"/></g>
+      <g fill="#4CE0FF"><rect x="70" y="700" width="10" height="14"/><rect x="30" y="760" width="10" height="14"/><rect x="280" y="770" width="10" height="14"/></g>
+      <polygon points="150,600 196,590 200,640 152,648" fill="#24123F"/><polyline points="160,630 168,604 176,630 184,604 192,630" fill="none" stroke="#00E86E" stroke-width="3" class="flick"/>
+    </g>
+      <path d="M710 690 Q 900 790 1100 700" fill="none" stroke="#2A1650" stroke-width="3"/>
+      <path d="M770 760 Q 950 850 1100 770" fill="none" stroke="#2A1650" stroke-width="2"/>
+    </g>
+    <g class="drone" data-depth=".08"><polygon points="0,0 26,-4 30,4 4,8" fill="#2A1650"/><circle cx="15" cy="10" r="3" fill="#FF0046" class="blink"/></g>
+  </svg>
+
   <div class="hero-copy">
-    <p class="kicker">// a desktop companion for Claude Code</p>
-    <h1 class="glitch-title" data-text="Claude Dock">Claude Dock</h1>
-    <p class="lede">A dock on the edge of my Windows screen that runs Claude Code for me. I talk, it types. Claude finishes, Capri tells me. My chats, usage and voice controls sit one click away.</p>
-    <div class="hero-cta">
-      <a class="btn primary" href="#voice">Meet her ↓</a>
-      <a class="btn" href="#built">How I built it</a>
-    </div>
-    <ul class="hero-facts">
-      <li><b>~8.9k</b> lines of C# and XAML</li>
-      <li><b>300 KB</b> exe, nothing to install</li>
-      <li><b>100%</b> local voice</li>
-    </ul>
+    <p class="tag">a desktop companion for Claude Code</p>
+    <h1 class="title" data-text="Claude Dock">Claude Dock</h1>
+    <p class="one">Talk to Claude Code from anywhere. Hear when it's done.</p>
+    <a class="btn" href="#talk">Follow her <span aria-hidden="true">↓</span></a>
   </div>
 
-  <div class="hero-stage" id="heroStage">
-    <div class="bubble" id="heroBubble">Hi, I'm Capri. Poke me.</div>
-    <canvas id="heroCapri" class="capri" aria-label="Capri, an animated character. Click, double-click or drag her."></canvas>
-    <div class="shadow" aria-hidden="true"></div>
-    <p class="hint">click · double-click · drag · or leave her alone for a bit</p>
+  <div class="tower" aria-hidden="true">
+    <div class="spot roof" data-spot="hero" data-pose="stand" data-face="l" data-ax=".46" data-size="1.45"></div>
+    <svg viewBox="0 0 260 600" preserveAspectRatio="none">
+      <polygon points="0,30 40,0 220,0 260,30 260,600 0,600" fill="#3A2470"/>
+      <polygon points="0,30 40,0 220,0 260,30" fill="#4B3399"/>
+      <g fill="#FFE27A"><rect x="30" y="70" width="18" height="12"/><rect x="70" y="110" width="18" height="12"/><rect x="190" y="90" width="18" height="12"/><rect x="150" y="170" width="18" height="12"/><rect x="40" y="230" width="18" height="12"/><rect x="200" y="260" width="18" height="12"/><rect x="110" y="320" width="18" height="12"/></g>
+      <g fill="#4CE0FF"><rect x="110" y="70" width="18" height="12"/><rect x="40" y="170" width="18" height="12"/><rect x="180" y="330" width="18" height="12"/></g>
+      <rect x="226" y="60" width="28" height="236" fill="#24123F"/>
+      <g class="flick" fill="none" stroke="#FF0046" stroke-width="4" stroke-linejoin="bevel">
+        <path d="M248 74 h-16 v24 h16"/><path d="M232 110 v24 h16"/><path d="M232 170 v-22 l8 -8 l8 8 v22 M232 158 h16"/><path d="M232 182 v24 h16 v-24"/><path d="M232 218 v24 h8 l8 -8 v-8 l-8 -8 z"/><path d="M248 254 h-16 v24 h16 M232 266 h12"/>
+      </g>
+    </svg>
+  </div>
+  <a class="scroll-cue" href="#talk" aria-label="Scroll down"><span></span></a>
+</section>
+
+<!-- ============================================================ 01 TALK: rooftops and wires -->
+<section class="sec talk" id="talk">
+  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <path d="M-20 60 Q 420 210 760 90 T 1460 120" fill="none" stroke="#2A1650" stroke-width="3" data-depth=".1"/>
+    <path d="M-20 110 Q 500 260 1460 70" fill="none" stroke="#2A1650" stroke-width="2" data-depth=".1"/>
+    <g data-depth=".2">
+      <polygon fill="#B49AF0" points="0,900 0,700 120,690 130,640 260,640 270,700 420,710 430,660 600,660 610,720 900,720 910,650 1060,650 1070,700 1280,690 1290,640 1440,640 1440,900"/>
+    </g>
+    <g data-depth=".32">
+      <polygon fill="#7B5BD6" points="0,900 0,770 300,760 310,740 520,740 530,780 1000,780 1010,740 1200,740 1210,770 1440,770 1440,900"/>
+      <g fill="#4B3399">
+        <rect x="1080" y="640" width="70" height="100"/><polygon points="1070,640 1115,610 1160,640"/>
+        <rect x="1090" y="740" width="8" height="30"/><rect x="1132" y="740" width="8" height="30"/>
+      </g>
+      <g stroke="#4B3399" stroke-width="4" fill="none"><path d="M200 760 v-90 M180 690 h40 M186 710 h28"/><path d="M1300 770 v-120 M1280 680 h40 M1286 700 h28 M1292 720 h16"/></g>
+      <polygon points="330,740 360,690 400,682 380,740" fill="#4B3399"/><line x1="365" y1="700" x2="395" y2="670" stroke="#4B3399" stroke-width="3"/>
+      <circle cx="200" cy="668" r="4" fill="#00E86E" class="blink"/><circle cx="1300" cy="648" r="4" fill="#FF0046" class="blink d2"/>
+    </g>
+  </svg>
+
+  <div class="wrap">
+    <h2 class="neon red">TALK</h2>
+    <p class="one">Hold <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd> and speak. Your words land in Claude Code.</p>
+
+    <div class="talk-demo">
+      <div class="screen-win term" id="voiceTerm">
+        <div class="spot" data-spot="talk" data-pose="perch" data-face="r" data-ax=".2"></div>
+        <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span class="win-title" id="termTitle">Claude Code</span></div>
+        <div class="term-body">
+          <p><span class="t-acc">✻</span> Welcome to Claude Code</p>
+          <p class="t-dim">  cwd: ~/projects/my-app</p>
+          <div id="termLog"></div>
+          <p class="t-input"><span class="t-acc">&gt;</span> <span id="termInput"></span><span class="caret"></span></p>
+        </div>
+      </div>
+
+      <div class="talk-side">
+        <span class="try">try it</span>
+        <button class="mic" id="micBtn" aria-label="Hold to talk">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+          <span id="micLabel">Hold to talk</span>
+        </button>
+        <div class="wave" id="wave" aria-hidden="true"></div>
+        <p class="caption" id="voiceCaption">Hold for a second, then let go.</p>
+      </div>
+    </div>
+
+    <details class="how">
+      <summary>How it works</summary>
+      <ul>
+        <li>Speech-to-text runs on the CPU (NVIDIA Parakeet via sherpa-onnx). No audio leaves the PC.</li>
+        <li>Words are typed into the terminal's input directly, so focus stays where you are.</li>
+        <li>Nothing is typed while Claude is asking for permission, so a stray word can't pick an option.</li>
+      </ul>
+    </details>
   </div>
 </section>
 
-<!-- ============================================================ 01 VOICE -->
-<section class="feature" id="voice">
-  <div class="feature-head">
-    <span class="num">01</span>
-    <h2>Talk to Claude from anywhere</h2>
-    <p>Hold <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>Space</kbd> and speak. Capri listens, turns it into text on my own CPU, and types it straight into the Claude Code chat I'm in. If no chat is open, she opens one.</p>
-  </div>
+<!-- ============================================================ 02 LISTEN: a wall with a neon sign -->
+<section class="sec listen" id="listen">
+  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g data-depth=".15">
+      <polygon fill="#C4A6EE" points="0,900 0,520 90,500 100,380 200,380 210,520 300,540 310,900"/>
+      <g fill="#FFF4B8" opacity=".8"><rect x="120" y="410" width="10" height="12"/><rect x="160" y="450" width="10" height="12"/><rect x="130" y="500" width="10" height="12"/></g>
+    </g>
+    <g data-depth=".28">
+      <polygon fill="#7B5BD6" points="820,900 820,120 880,60 1440,40 1440,900"/>
+      <polygon fill="#6A47C9" points="820,120 880,60 900,900 820,900"/>
+      <g fill="#5A3BB5">
+        <rect x="960" y="160" width="80" height="50"/><rect x="1120" y="140" width="80" height="50"/><rect x="1280" y="150" width="80" height="50"/>
+        <rect x="960" y="620" width="80" height="50"/><rect x="1280" y="640" width="80" height="50"/>
+      </g>
+      <g fill="#FFE27A"><rect x="975" y="172" width="20" height="26"/><rect x="1300" y="162" width="20" height="26"/><rect x="1135" y="152" width="20" height="26"/></g>
+      <g fill="#4CE0FF"><rect x="1005" y="172" width="20" height="26"/><rect x="1300" y="652" width="20" height="26"/></g>
+      <g fill="#4B3399"><rect x="1060" y="700" width="70" height="44"/><rect x="1200" y="300" width="70" height="44"/></g>
+      <g stroke="#3A2470" stroke-width="6" fill="none"><path d="M900 0 V 900"/><path d="M1420 200 V 900"/><path d="M1130 720 H 1420"/></g>
+      <g stroke="#3A2470" stroke-width="2"><line x1="1075" y1="712" x2="1115" y2="712"/><line x1="1075" y1="722" x2="1115" y2="722"/><line x1="1075" y1="732" x2="1115" y2="732"/></g>
+    </g>
+    <g class="steam" data-depth=".28"><polygon points="1090,700 1080,640 1100,600 1085,560" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="10" stroke-linejoin="bevel"/></g>
+  </svg>
 
-  <div class="demo voice-demo">
-    <div class="window term" id="voiceTerm">
-      <canvas class="capri perch" id="voiceCapri" aria-hidden="true"></canvas>
-      <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span class="win-title" id="termTitle">Claude Code</span></div>
-      <div class="term-body" id="termBody">
-        <p><span class="t-acc">✻</span> Welcome to Claude Code</p>
-        <p class="t-dim">  cwd: ~/projects/my-app</p>
-        <div id="termLog"></div>
-        <p class="t-input"><span class="t-acc">&gt;</span> <span id="termInput"></span><span class="caret"></span></p>
+  <div class="wrap">
+    <h2 class="neon green">LISTEN</h2>
+    <p class="one">When Claude needs you or finishes, Capri says so, in one clean sentence.</p>
+
+    <div class="listen-demo">
+      <div class="col">
+        <span class="try">pick a moment</span>
+        <div class="events" role="group" aria-label="Claude Code moments">
+          <button data-ev="done" class="on">Finished</button>
+          <button data-ev="perm">Needs permission</button>
+          <button data-ev="ask">Has a question</button>
+          <button data-ev="error">Error</button>
+          <button data-ev="toolfail">Tool failed</button>
+        </div>
+        <div class="screen-win md">
+          <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span class="win-title">Claude's reply · edit me</span></div>
+          <textarea id="mdIn" spellcheck="false" aria-label="Claude's reply in markdown"></textarea>
+        </div>
+      </div>
+
+      <div class="says">
+        <div class="board">
+          <div class="spot" data-spot="listen" data-pose="perch" data-face="l" data-ax=".72"></div>
+          <span class="board-label">Capri says</span>
+          <p class="said" id="mdOut"></p>
+        </div>
       </div>
     </div>
 
-    <div class="voice-side">
-      <button class="mic" id="micBtn" aria-label="Hold to talk">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
-        <span id="micLabel">Hold to talk</span>
-      </button>
-      <div class="wave" id="wave" aria-hidden="true"></div>
-      <p class="caption" id="voiceCaption">Hold the button (or <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd>) for a second, then let go.</p>
-      <p class="fine">This is a simulation. The real dock records your mic.</p>
-    </div>
+    <details class="how">
+      <summary>How it works</summary>
+      <ul>
+        <li>Claude Code's hooks tell the dock about each moment. A failed tool or a memory compaction gets a silent glitch.</li>
+        <li>For a finished reply she drops code, links and markdown and keeps the first sentence. That's the real rule from the dock, running here.</li>
+        <li>Her voice is Kokoro text-to-speech, on the CPU. If you're already looking at that chat, she only shows a caption.</li>
+      </ul>
+    </details>
   </div>
-
-  <ul class="points">
-    <li><b>Runs on my PC.</b> NVIDIA's Parakeet speech model, run by sherpa-onnx on the CPU. The text is back about a second after I stop talking. No audio leaves the machine.</li>
-    <li><b>Types without grabbing focus.</b> Words go into the terminal's input directly, so I can keep working in another window.</li>
-    <li><b>Never answers for me.</b> While Claude shows a permission prompt or a question, nothing gets typed, so a stray word can't pick an option.</li>
-  </ul>
 </section>
 
-<!-- ============================================================ 02 READS -->
-<section class="feature" id="reads">
-  <div class="feature-head">
-    <span class="num">02</span>
-    <h2>She tells me when Claude is done</h2>
-    <p>Claude Code's hooks tell the dock about the moments that matter. Capri says them out loud, so I can look away while Claude works. When it finishes, she reads the first sentence of its answer with the markdown, code and links taken out.</p>
-  </div>
+<!-- ============================================================ 03 DOCK: a billboard -->
+<section class="sec dock-sec" id="dock">
+  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g data-depth=".12">
+      <polygon fill="#9C7FE6" points="0,900 0,600 80,580 90,480 170,480 180,600 260,620 270,900"/>
+      <polygon fill="#9C7FE6" points="1180,900 1180,560 1250,520 1330,540 1340,440 1440,430 1440,900"/>
+      <g fill="#FFF4B8" opacity=".8"><rect x="110" y="510" width="10" height="12"/><rect x="140" y="560" width="10" height="12"/><rect x="1360" y="470" width="10" height="12"/><rect x="1270" y="590" width="10" height="12"/></g>
+    </g>
+    <g data-depth=".22" class="cones">
+      <polygon points="300,900 360,880 600,120 420,120" fill="#FFF3B0" opacity=".18"/>
+      <polygon points="1140,900 1080,880 840,120 1020,120" fill="#B6F5FF" opacity=".18"/>
+      <polygon points="330,900 300,860 360,850 380,890" fill="#3A2470"/><polygon points="1110,900 1140,860 1080,850 1060,890" fill="#3A2470"/>
+    </g>
+  </svg>
 
-  <div class="demo reads-demo">
-    <div class="window md">
-      <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span class="win-title">Claude's reply (edit me)</span></div>
-      <textarea id="mdIn" spellcheck="false">**Fixed it.** The parser choked on `C:\Users\me\data\report.csv` because the path had a trailing slash, see [the docs](https://example.com/docs).
+  <div class="wrap">
+    <h2 class="neon cyan">THE DOCK</h2>
+    <p class="one">Chats, usage and voice, one click away on the edge of your screen.</p>
 
-```js
-const clean = path.replace(/\\$/, "");
-```
-
-- Added a test
-- All 42 tests pass</textarea>
-    </div>
-
-    <div class="spoken">
-      <div class="spoken-stage">
-        <div class="bubble left" id="readBubble">…</div>
-        <canvas class="capri perch" id="readCapri" aria-hidden="true"></canvas>
-        <div class="ledge" aria-hidden="true"></div>
+    <div class="billboard">
+      <div class="beam" aria-hidden="true">
+        <div class="spot" data-spot="dock" data-pose="lie" data-face="r" data-ax=".5"></div>
       </div>
-      <p class="label">What Capri says</p>
-      <p class="said" id="mdOut"></p>
-      <div class="events" role="group" aria-label="Claude Code events">
-        <button data-ev="done" class="on">Finished</button>
-        <button data-ev="perm">Needs permission</button>
-        <button data-ev="ask">Asks a question</button>
-        <button data-ev="toolfail">Tool failed</button>
-        <button data-ev="error">Error</button>
-        <button data-ev="compact">Compacting</button>
+      <span class="try on-board">drag it · move away from it</span>
+      <div class="screen" id="screen">
+        <div class="wall" aria-hidden="true"></div>
+        <div class="fake-win" aria-hidden="true"><div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span class="win-title">my-app — VS Code</span></div></div>
+        <div class="edge-glow" id="edgeGlow"></div>
+
+        <div class="dock" id="dockPanel" data-theme="dark" data-corners="rounded">
+          <div class="dock-head" id="dockHead"><span class="logo" aria-hidden="true"></span><span>Claude Code</span><span class="more" aria-hidden="true">⋯</span></div>
+          <button class="d-btn d-primary" data-toast="Opens a new Claude Code terminal">+ New chat <span class="d-faint">▾</span></button>
+          <div class="d-row">
+            <button class="d-btn d-voice" data-toast="Same as Ctrl+Alt+Space">Talk to Claude</button>
+            <button class="d-icon" data-toast="Ctrl+Alt+H: she glitches away" title="Hide Capri">◐</button>
+          </div>
+          <div class="d-row">
+            <button class="d-btn" data-toast="claude --continue">↻ Continue</button>
+            <button class="d-btn" data-toast="claude --resume">☰ Resume</button>
+          </div>
+          <div class="d-usage">
+            <div class="meter"><span>Context</span><b>42%</b><i style="--v:42%"></i></div>
+            <div class="meter"><span>5-hour</span><b>63%</b><i style="--v:63%"></i></div>
+            <div class="meter"><span>Weekly</span><b>28%</b><i style="--v:28%"></i></div>
+          </div>
+          <input class="d-search" id="dockSearch" placeholder="Search chats" aria-label="Search chats">
+          <ul class="d-list" id="dockList"></ul>
+        </div>
+
+        <div class="taskbar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        <div class="toast" id="toast"></div>
       </div>
-    </div>
-  </div>
-
-  <ul class="points">
-    <li><b>Only what matters.</b> Finished, needs permission, has a question, hit an error. A failed tool or a memory compaction gets a silent glitch instead of words.</li>
-    <li><b>Quiet when I'm watching.</b> If that chat's terminal is already in front, she shows a caption and doesn't speak.</li>
-    <li><b>Her own voice, offline.</b> Kokoro text-to-speech on the CPU, lip-synced to her mouth. The model unloads after a minute of silence.</li>
-  </ul>
-</section>
-
-<!-- ============================================================ 03 DOCK -->
-<section class="feature" id="dock">
-  <div class="feature-head">
-    <span class="num">03</span>
-    <h2>A home for Claude Code</h2>
-    <p>The dock sits on the edge of the screen and slides away when I'm not using it. It's where I start chats, pick up old ones, watch how full the context is, and check my plan limits. Try it below: drag it by the header, move the mouse off it, and change how it looks.</p>
-  </div>
-
-  <div class="demo dock-demo">
-    <div class="screen" id="screen">
-      <div class="wall" aria-hidden="true"></div>
-      <div class="fake-win" aria-hidden="true"><div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span class="win-title">my-app — VS Code</span></div></div>
-      <div class="edge-glow" id="edgeGlow"></div>
-
-      <div class="dock" id="dockPanel" data-theme="dark" data-corners="rounded">
-        <div class="dock-head" id="dockHead">
-          <span class="logo" aria-hidden="true"></span><span>Claude Code</span><span class="more" aria-hidden="true">⋯</span>
-        </div>
-        <button class="d-btn d-primary" data-toast="Opens a new Claude Code terminal in the start folder">＋ New chat <span class="d-faint">▾</span></button>
-        <div class="d-row">
-          <button class="d-btn d-voice" data-toast="Same as Ctrl+Alt+Space: Capri listens">🎙 Talk to Claude</button>
-          <button class="d-icon" data-toast="Ctrl+Alt+H: she shatters away" title="Hide Capri">◐</button>
-          <button class="d-icon" data-toast="Mutes her voice, captions stay" title="Mute">🔈</button>
-        </div>
-        <div class="d-row">
-          <button class="d-btn" data-toast="claude --continue">↻ Continue last</button>
-          <button class="d-btn" data-toast="claude --resume">☰ Resume</button>
-        </div>
-        <div class="d-folder"><span>📁 ~/projects/my-app</span><span class="d-acc">Change</span></div>
-        <div class="d-usage">
-          <div class="meter"><span>Context</span><b>42%</b><i style="--v:42%"></i></div>
-          <div class="meter"><span>5-hour</span><b>63%</b><i style="--v:63%"></i></div>
-          <div class="meter"><span>Weekly</span><b>28%</b><i style="--v:28%"></i></div>
-        </div>
-        <div class="d-label">Recent</div>
-        <input class="d-search" id="dockSearch" placeholder="Search chats" aria-label="Search chats">
-        <ul class="d-list" id="dockList"></ul>
-      </div>
-
-      <div class="taskbar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-      <canvas class="capri walker" id="walkCapri" aria-hidden="true"></canvas>
-      <div class="toast" id="toast"></div>
+      <div class="legs" aria-hidden="true"><i></i><i></i></div>
     </div>
 
     <div class="look">
-      <p class="label">Appearance</p>
-      <div class="seg" data-set="theme">
-        <button data-v="dark" class="on">Dark</button><button data-v="midnight">Midnight</button><button data-v="light">Light</button>
+      <div class="seg" data-set="theme" aria-label="Theme"><button data-v="dark" class="on">Dark</button><button data-v="midnight">Midnight</button><button data-v="light">Light</button></div>
+      <div class="swatches" id="swatches" aria-label="Accent">
+        <button style="--c:#D97757" class="on" aria-label="Claude orange"></button><button style="--c:#FF0046" aria-label="Capri red"></button><button style="--c:#00E86E" aria-label="Capri green"></button><button style="--c:#4C8DFF" aria-label="Blue"></button>
       </div>
-      <p class="label">Accent</p>
-      <div class="swatches" id="swatches">
-        <button style="--c:#D97757" class="on" aria-label="Claude orange"></button>
-        <button style="--c:#FF0046" aria-label="Capri's hair"></button>
-        <button style="--c:#00E86E" aria-label="Capri's accents"></button>
-        <button style="--c:#4C8DFF" aria-label="Blue"></button>
-        <button style="--c:#A46BFF" aria-label="Violet"></button>
-      </div>
-      <p class="label">Corners</p>
-      <div class="seg" data-set="corners">
-        <button data-v="rounded" class="on">Rounded</button><button data-v="soft">Soft</button><button data-v="square">Square</button>
-      </div>
-      <label class="switch"><input type="checkbox" id="autoHide" checked><span></span>Slide away when not in use</label>
-      <ul class="points mini">
-        <li>Snaps to whichever screen edge is closest.</li>
-        <li>Hides behind a thin glowing strip. Touch it to bring the dock back.</li>
-        <li>Usage meters show the same numbers as <code>/usage</code>, read from Claude Code's own files.</li>
-      </ul>
+      <div class="seg" data-set="corners" aria-label="Corners"><button data-v="rounded" class="on">Round</button><button data-v="soft">Soft</button><button data-v="square">Square</button></div>
+      <label class="switch"><input type="checkbox" id="autoHide" checked><span></span>Auto-hide</label>
     </div>
   </div>
 </section>
 
-<!-- ============================================================ 04 MORE -->
-<section class="feature" id="more">
-  <div class="feature-head">
-    <span class="num">04</span>
-    <h2>And she has a life of her own</h2>
-    <p>Small things that make the dock feel alive, all driven by what Claude Code and my PC are actually doing.</p>
-  </div>
+<!-- ============================================================ 04 STREET: shopfronts -->
+<section class="sec street" id="street">
+  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <g data-depth=".1">
+      <polygon fill="#8A6DDB" points="0,900 0,140 120,120 130,40 260,40 270,130 420,140 430,60 560,50 570,140 760,130 770,30 900,30 910,130 1060,120 1070,50 1200,40 1210,130 1440,120 1440,900"/>
+      <g fill="#FFE27A" opacity=".85"><rect x="160" y="70" width="12" height="14"/><rect x="200" y="100" width="12" height="14"/><rect x="470" y="90" width="12" height="14"/><rect x="800" y="60" width="12" height="14"/><rect x="840" y="100" width="12" height="14"/><rect x="1110" y="80" width="12" height="14"/></g>
+      <g fill="#4CE0FF" opacity=".85"><rect x="500" y="110" width="12" height="14"/><rect x="1140" y="100" width="12" height="14"/></g>
+    </g>
+    <g data-depth=".2">
+      <polygon fill="#3A2470" points="0,900 0,820 1440,800 1440,900"/>
+      <polygon points="140,850 330,842 320,858 150,864" fill="#FF0046" opacity=".7"/>
+      <polygon points="700,838 900,832 890,846 710,850" fill="#00E86E" opacity=".6"/>
+      <polygon points="1150,830 1300,826 1295,838 1160,842" fill="#4CE0FF" opacity=".6"/>
+      <g stroke="#24123F" stroke-width="6"><line x1="60" y1="820" x2="60" y2="560"/><line x1="1380" y1="802" x2="1380" y2="540"/></g>
+      <polygon points="40,560 90,556 84,572 46,574" fill="#24123F"/><polygon points="1360,540 1410,536 1404,552 1366,554" fill="#24123F"/>
+      <polygon points="50,574 80,572 120,700 10,704" fill="#FFF3B0" opacity=".25"/><polygon points="1370,554 1400,552 1440,680 1330,684" fill="#FFF3B0" opacity=".25"/>
+    </g>
+  </svg>
 
-  <div class="cards">
-    <article class="card">
-      <div class="card-stage clones" id="cloneStage">
-        <canvas class="capri" id="cloneMain" aria-hidden="true"></canvas>
-      </div>
-      <h3>Helper clones</h3>
-      <p>When Claude Code starts subagents, a small clone of her steps in for each one and leaves when it's done.</p>
-      <button class="btn small" id="cloneBtn">Start 3 subagents</button>
-    </article>
+  <div class="wrap">
+    <h2 class="neon pink">HER LIFE</h2>
+    <p class="one">Little things she does, driven by what Claude Code and your PC are doing.</p>
 
-    <article class="card">
-      <div class="card-stage"><div class="ledge" aria-hidden="true"></div><canvas class="capri perch" id="musicCapri" aria-hidden="true"></canvas><div class="beat" id="beat" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>
-      <h3>She dances to my music</h3>
-      <p>She reads Windows' audio meters (nothing is recorded), finds the beat between 60 and 180 BPM, and sways on her window in time.</p>
-      <label class="range">tempo <input type="range" id="bpm" min="60" max="180" value="112"><output id="bpmOut">112 BPM</output></label>
-    </article>
+    <div class="shops">
+      <article class="shop" style="--n:#00E86E">
+        <div class="awning"></div>
+        <h3 class="shop-sign">CLONES</h3>
+        <div class="shop-win clones" id="cloneStage"></div>
+        <p>Claude starts subagents, she brings helpers.</p>
+        <button class="btn small" id="cloneBtn">Run 3 subagents</button>
+      </article>
 
-    <article class="card">
-      <div class="card-stage"><canvas class="capri" id="styleCapri" aria-hidden="true"></canvas></div>
-      <h3>Style her</h3>
-      <p>Hair and accent colours, a pixel-art look and outlines. The dock can match its accent to her. This slider recolours every Capri on the page.</p>
-      <label class="range">hue <input type="range" id="hue" min="0" max="360" value="0"><output id="hueOut">0°</output></label>
-    </article>
+      <article class="shop" style="--n:#FF0046">
+        <div class="awning"><div class="spot" data-spot="street" data-pose="perch" data-face="l" data-ax=".6" data-music="1"></div></div>
+        <h3 class="shop-sign">BEAT</h3>
+        <div class="shop-win beat-win"><div class="beat" id="beat"><i></i><i></i><i></i><i></i></div><output id="bpmOut">112 BPM</output></div>
+        <p>Music on your PC? She finds the beat and sways.</p>
+        <input type="range" id="bpm" min="60" max="180" value="112" aria-label="Tempo">
+      </article>
 
-    <article class="card">
-      <div class="card-stage"><canvas class="capri" id="glitchCapri" aria-hidden="true"></canvas></div>
-      <h3>She lives on my desktop</h3>
-      <p>She sits on window tops and the taskbar, falls when a window closes, and teleports with a ribbon trail. She stays out of the way of fullscreen games and videos.</p>
-      <p class="keys"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>H</kbd> hide or show &nbsp; <kbd>Ctrl</kbd>+scroll resize</p>
-    </article>
+      <article class="shop" style="--n:#4CE0FF">
+        <div class="awning"></div>
+        <h3 class="shop-sign">STYLE</h3>
+        <div class="shop-win style-win"><span class="hue-dot" id="hueDot"></span></div>
+        <p>Recolour her. The dock can match its accent.</p>
+        <input type="range" id="hue" min="0" max="360" value="0" aria-label="Her colour">
+      </article>
+
+      <article class="shop" style="--n:#FFD23F">
+        <div class="awning"></div>
+        <h3 class="shop-sign">DESKTOP</h3>
+        <div class="shop-win keys-win">
+          <p><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Space</kbd> talk</p>
+          <p><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>H</kbd> hide</p>
+          <p><kbd>Ctrl</kbd>+scroll resize</p>
+        </div>
+        <p>She sits on your windows and taskbar, and teleports like here.</p>
+      </article>
+    </div>
   </div>
 </section>
 
-<!-- ============================================================ 05 BUILT -->
-<section class="feature built" id="built">
-  <div class="feature-head">
-    <span class="num">05</span>
-    <h2>How I built it</h2>
-    <p>I built the whole thing with Claude Code in a terminal. I described what I wanted, tested it on my own desktop, and kept going until it felt right. This site was made the same way.</p>
+<!-- ============================================================ 05 BUILT: a corridor -->
+<section class="sec built" id="built">
+  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <polygon fill="#4B3399" points="0,0 1440,0 1440,900 0,900"/>
+    <polygon fill="#3E2A86" points="0,0 560,300 560,640 0,900"/>
+    <polygon fill="#3E2A86" points="1440,0 880,300 880,640 1440,900"/>
+    <polygon fill="#352274" points="0,0 1440,0 880,300 560,300"/>
+    <polygon fill="#2E1D66" points="0,900 560,640 880,640 1440,900"/>
+    <polygon fill="#FFD9B8" points="660,380 780,380 780,640 660,640"/>
+    <polygon fill="#FFF3E4" points="660,380 700,380 700,640 660,640" opacity=".7"/>
+    <polygon fill="#FFD9B8" opacity=".25" points="660,640 780,640 1000,900 440,900"/>
+    <g stroke="#2A1650" stroke-width="8" fill="none"><path d="M0 60 L 560 330"/><path d="M0 90 L 560 345"/><path d="M1440 70 L 880 335"/></g>
+    <g stroke="#24123F" stroke-width="2" opacity=".6"><line x1="720" y1="640" x2="200" y2="900"/><line x1="720" y1="640" x2="1240" y2="900"/><line x1="560" y1="700" x2="880" y2="700"/><line x1="460" y1="780" x2="980" y2="780"/></g>
+    <polygon points="120,300 300,330 300,420 120,400" fill="#24123F"/><polyline points="140,380 160,340 180,380 200,340 220,380 240,340 260,380 280,350" fill="none" stroke="#FF0046" stroke-width="4" class="flick"/>
+    <polygon points="1180,320 1340,300 1340,380 1180,392" fill="#24123F"/><path d="M1200 360 h40 M1260 340 v36 M1290 340 h30" stroke="#00E86E" stroke-width="4" class="flick d2"/>
+    <polygon points="560,300 880,300 860,312 580,312" fill="#B6F5FF" opacity=".8" class="flick"/>
+  </svg>
+
+  <div class="wrap">
+    <h2 class="neon gold">BUILT WITH CLAUDE CODE</h2>
+    <p class="one">I built all of it in a terminal with Claude Code. This site too.</p>
+    <div class="stats">
+      <div><b>~8.9k</b><span>lines of C# 5 and XAML</span></div>
+      <div><b>300 KB</b><span>one exe, nothing to install</span></div>
+      <div><b>2</b><span>local AI models: ears and voice</span></div>
+      <div><b>9</b><span>Claude Code hooks it reacts to</span></div>
+    </div>
+    <details class="how">
+      <summary>Under the hood</summary>
+      <ul>
+        <li>C# 5 and WPF, compiled by the C# compiler that ships with Windows (.NET Framework 4.8).</li>
+        <li>Claude Code runs <code>ClaudeDock.exe --hook</code> for its events; the dock reads Claude's own transcripts for chats, context and plan usage.</li>
+        <li>sherpa-onnx runs Parakeet (ears) and Kokoro (voice). Her effects are drawn in layered, click-through windows.</li>
+      </ul>
+    </details>
+    <div class="bench" aria-hidden="true"><div class="spot" data-spot="built" data-pose="lie" data-face="l" data-ax=".5" data-sleep="1"></div></div>
   </div>
-  <div class="stats">
-    <div><b>~8,900</b><span>lines of C# 5 and XAML</span></div>
-    <div><b>0</b><span>installs: built by the C# compiler that ships with Windows</span></div>
-    <div><b>2</b><span>local AI models: one to listen, one to speak</span></div>
-    <div><b>9</b><span>Claude Code hook events the dock reacts to</span></div>
-  </div>
-  <div class="stack">
-    <span>C# 5 / .NET Framework 4.8</span><span>WPF</span><span>Win32 console + layered windows</span><span>GDI+</span><span>sherpa-onnx</span><span>Parakeet TDT</span><span>Kokoro TTS</span><span>Windows audio meters</span><span>Claude Code hooks</span>
-  </div>
-  <ul class="points">
-    <li><b>Hooks into Claude Code.</b> The dock adds itself to Claude Code's hooks in <code>settings.json</code> and leaves the rest of that file untouched. Claude Code runs <code>ClaudeDock.exe --hook</code>, which passes the event to the running dock and exits.</li>
-    <li><b>Reads Claude Code's own files.</b> It reads the session transcripts to find the chat I'm in, its title, how full its context window is, and my plan limits.</li>
-    <li><b>Smooth at any scale.</b> Her animation follows the screen's refresh rate, frames are prepared in the background at her exact size, and she stays the same size on monitors with different scaling.</li>
-  </ul>
+
+  <footer class="foot">
+    <p>Claude Dock is my personal, non-commercial project, not affiliated with Anthropic.</p>
+    <p><b>Capri isn't my creation.</b> Her art and animations come from the <a href="https://github.com/lachydotmcg/capri-desktop">Capri project</a>, used under the <a href="https://polyformproject.org/licenses/noncommercial/1.0.0">PolyForm Noncommercial License 1.0.0</a>. Capri is an unofficial fan project, not approved or endorsed by CD PROJEKT RED, the anime's rights holders or its voice actors.</p>
+    <p class="notice">Required Notice: Copyright 2026 Lachy (https://github.com/lachydotmcg)<br>
+    Required Notice: Anyone who uses Capri's code, art, animations or any of its other assets must credit the Capri project (https://github.com/lachydotmcg/capri-desktop). Capri's art and animations are by her artist, who prefers to stay private. Parts made by others keep their own licences, listed in its README.</p>
+  </footer>
 </section>
 
 </main>
-
-<footer class="foot">
-  <p><b>Claude Dock</b> is my personal, non-commercial project. It isn't affiliated with or endorsed by Anthropic. Claude and Claude Code are Anthropic's.</p>
-  <p><b>Capri isn't my creation.</b> Her art, animations and voice setup come from the <a href="https://github.com/lachydotmcg/capri-desktop">Capri project</a>, used under the <a href="https://polyformproject.org/licenses/noncommercial/1.0.0">PolyForm Noncommercial License 1.0.0</a>. Capri is an unofficial fan project and isn't approved or endorsed by CD PROJEKT RED, the anime's rights holders or its voice actors.</p>
-  <p class="notice">Required Notice: Copyright 2026 Lachy (https://github.com/lachydotmcg)<br>
-  Required Notice: Anyone who uses Capri's code, art, animations or any of its other assets must credit the Capri project (https://github.com/lachydotmcg/capri-desktop). Capri's art and animations are by her artist, who prefers to stay private. Parts made by others keep their own licences, listed in its README.</p>
-  <p>Font: Share Tech Mono (SIL OFL). Voice in this page's demo: your browser's built-in speech.</p>
-</footer>
-
 <script src="app.js"></script>
 </body>
 </html>
