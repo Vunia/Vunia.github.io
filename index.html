@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Dock · a desktop companion for Claude Code</title>
+<meta name="description" content="Claude Dock: a Windows dock and voice companion for Claude Code. Talk to Claude, hear what it finished, and keep your chats one click away. Built with Claude Code.">
+<meta property="og:title" content="Claude Dock">
+<meta property="og:description" content="A Windows dock and voice companion for Claude Code, built with Claude Code.">
+<link rel="preload" href="assets/capri/idle.png" as="image">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="scan" aria-hidden="true"></div>
+
+<header class="nav">
+  <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>claude_dock</a>
+  <nav>
+    <a href="#voice">voice</a>
+    <a href="#reads">reads</a>
+    <a href="#dock">dock</a>
+    <a href="#more">more</a>
+    <a href="#built">built</a>
+  </nav>
+  <button class="sound" id="soundBtn" aria-pressed="false" title="Let Capri talk out loud (uses your browser's voice)">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="w" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+    <span>sound off</span>
+  </button>
+</header>
+
+<main id="top">
+
+<!-- ============================================================ HERO -->
+<section class="hero">
+  <div class="hero-copy">
+    <p class="kicker">// a desktop companion for Claude Code</p>
+    <h1 class="glitch-title" data-text="Claude Dock">Claude Dock</h1>
+    <p class="lede">A dock on the edge of my Windows screen that runs Claude Code for me. I talk, it types. Claude finishes, Capri tells me. My chats, usage and voice controls sit one click away.</p>
+    <div class="hero-cta">
+      <a class="btn primary" href="#voice">Meet her ↓</a>
+      <a class="btn" href="#built">How I built it</a>
+    </div>
+    <ul class="hero-facts">
+      <li><b>~8.9k</b> lines of C# and XAML</li>
+      <li><b>300 KB</b> exe, nothing to install</li>
+      <li><b>100%</b> local voice</li>
+    </ul>
+  </div>
+
+  <div class="hero-stage" id="heroStage">
+    <div class="bubble" id="heroBubble">Hi, I'm Capri. Poke me.</div>
+    <canvas id="heroCapri" class="capri" aria-label="Capri, an animated character. Click, double-click or drag her."></canvas>
+    <div class="shadow" aria-hidden="true"></div>
+    <p class="hint">click · double-click · drag · or leave her alone for a bit</p>
+  </div>
+</section>
+
+<!-- ============================================================ 01 VOICE -->
+<section class="feature" id="voice">
+  <div class="feature-head">
+    <span class="num">01</span>
+    <h2>Talk to Claude from anywhere</h2>
+    <p>Hold <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>Space</kbd> and speak. Capri listens, turns it into text on my own CPU, and types it straight into the Claude Code chat I'm in. If no chat is open, she opens one.</p>
+  </div>
+
+  <div class="demo voice-demo">
+    <div class="window term" id="voiceTerm">
+      <canvas class="capri perch" id="voiceCapri" aria-hidden="true"></canvas>
+      <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span class="win-title" id="termTitle">Claude Code</span></div>
+      <div class="term-body" id="termBody">
+        <p><span class="t-acc">✻</span> Welcome to Claude Code</p>
+        <p class="t-dim">  cwd: ~/projects/my-app</p>
+        <div id="termLog"></div>
+        <p class="t-input"><span class="t-acc">&gt;</span> <span id="termInput"></span><span class="caret"></span></p>
+      </div>
+    </div>
+
+    <div class="voice-side">
+      <button class="mic" id="micBtn" aria-label="Hold to talk">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+        <span id="micLabel">Hold to talk</span>
+      </button>
+      <div class="wave" id="wave" aria-hidden="true"></div>
+      <p class="caption" id="voiceCaption">Hold the button (or <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd>) for a second, then let go.</p>
+      <p class="fine">This is a simulation. The real dock records your mic.</p>
+    </div>
+  </div>
+
+  <ul class="points">
+    <li><b>Runs on my PC.</b> NVIDIA's Parakeet speech model, run by sherpa-onnx on the CPU. The text is back about a second after I stop talking. No audio leaves the machine.</li>
+    <li><b>Types without grabbing focus.</b> Words go into the terminal's input directly, so I can keep working in another window.</li>
+    <li><b>Never answers for me.</b> While Claude shows a permission prompt or a question, nothing gets typed, so a stray word can't pick an option.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 02 READS -->
+<section class="feature" id="reads">
+  <div class="feature-head">
+    <span class="num">02</span>
+    <h2>She tells me when Claude is done</h2>
+    <p>Claude Code's hooks tell the dock about the moments that matter. Capri says them out loud, so I can look away while Claude works. When it finishes, she reads the first sentence of its answer with the markdown, code and links taken out.</p>
+  </div>
+
+  <div class="demo reads-demo">
+    <div class="window md">
+      <div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span class="win-title">Claude's reply (edit me)</span></div>
+      <textarea id="mdIn" spellcheck="false">**Fixed it.** The parser choked on `C:\Users\me\data\report.csv` because the path had a trailing slash, see [the docs](https://example.com/docs).
+
+```js
+const clean = path.replace(/\\$/, "");
+```
+
+- Added a test
+- All 42 tests pass</textarea>
+    </div>
+
+    <div class="spoken">
+      <div class="spoken-stage">
+        <div class="bubble left" id="readBubble">…</div>
+        <canvas class="capri perch" id="readCapri" aria-hidden="true"></canvas>
+        <div class="ledge" aria-hidden="true"></div>
+      </div>
+      <p class="label">What Capri says</p>
+      <p class="said" id="mdOut"></p>
+      <div class="events" role="group" aria-label="Claude Code events">
+        <button data-ev="done" class="on">Finished</button>
+        <button data-ev="perm">Needs permission</button>
+        <button data-ev="ask">Asks a question</button>
+        <button data-ev="toolfail">Tool failed</button>
+        <button data-ev="error">Error</button>
+        <button data-ev="compact">Compacting</button>
+      </div>
+    </div>
+  </div>
+
+  <ul class="points">
+    <li><b>Only what matters.</b> Finished, needs permission, has a question, hit an error. A failed tool or a memory compaction gets a silent glitch instead of words.</li>
+    <li><b>Quiet when I'm watching.</b> If that chat's terminal is already in front, she shows a caption and doesn't speak.</li>
+    <li><b>Her own voice, offline.</b> Kokoro text-to-speech on the CPU, lip-synced to her mouth. The model unloads after a minute of silence.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 03 DOCK -->
+<section class="feature" id="dock">
+  <div class="feature-head">
+    <span class="num">03</span>
+    <h2>A home for Claude Code</h2>
+    <p>The dock sits on the edge of the screen and slides away when I'm not using it. It's where I start chats, pick up old ones, watch how full the context is, and check my plan limits. Try it below: drag it by the header, move the mouse off it, and change how it looks.</p>
+  </div>
+
+  <div class="demo dock-demo">
+    <div class="screen" id="screen">
+      <div class="wall" aria-hidden="true"></div>
+      <div class="fake-win" aria-hidden="true"><div class="win-bar"><span class="dots"><i></i><i></i><i></i></span><span class="win-title">my-app — VS Code</span></div></div>
+      <div class="edge-glow" id="edgeGlow"></div>
+
+      <div class="dock" id="dockPanel" data-theme="dark" data-corners="rounded">
+        <div class="dock-head" id="dockHead">
+          <span class="logo" aria-hidden="true"></span><span>Claude Code</span><span class="more" aria-hidden="true">⋯</span>
+        </div>
+        <button class="d-btn d-primary" data-toast="Opens a new Claude Code terminal in the start folder">＋ New chat <span class="d-faint">▾</span></button>
+        <div class="d-row">
+          <button class="d-btn d-voice" data-toast="Same as Ctrl+Alt+Space: Capri listens">🎙 Talk to Claude</button>
+          <button class="d-icon" data-toast="Ctrl+Alt+H: she shatters away" title="Hide Capri">◐</button>
+          <button class="d-icon" data-toast="Mutes her voice, captions stay" title="Mute">🔈</button>
+        </div>
+        <div class="d-row">
+          <button class="d-btn" data-toast="claude --continue">↻ Continue last</button>
+          <button class="d-btn" data-toast="claude --resume">☰ Resume</button>
+        </div>
+        <div class="d-folder"><span>📁 ~/projects/my-app</span><span class="d-acc">Change</span></div>
+        <div class="d-usage">
+          <div class="meter"><span>Context</span><b>42%</b><i style="--v:42%"></i></div>
+          <div class="meter"><span>5-hour</span><b>63%</b><i style="--v:63%"></i></div>
+          <div class="meter"><span>Weekly</span><b>28%</b><i style="--v:28%"></i></div>
+        </div>
+        <div class="d-label">Recent</div>
+        <input class="d-search" id="dockSearch" placeholder="Search chats" aria-label="Search chats">
+        <ul class="d-list" id="dockList"></ul>
+      </div>
+
+      <div class="taskbar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <canvas class="capri walker" id="walkCapri" aria-hidden="true"></canvas>
+      <div class="toast" id="toast"></div>
+    </div>
+
+    <div class="look">
+      <p class="label">Appearance</p>
+      <div class="seg" data-set="theme">
+        <button data-v="dark" class="on">Dark</button><button data-v="midnight">Midnight</button><button data-v="light">Light</button>
+      </div>
+      <p class="label">Accent</p>
+      <div class="swatches" id="swatches">
+        <button style="--c:#D97757" class="on" aria-label="Claude orange"></button>
+        <button style="--c:#FF0046" aria-label="Capri's hair"></button>
+        <button style="--c:#00E86E" aria-label="Capri's accents"></button>
+        <button style="--c:#4C8DFF" aria-label="Blue"></button>
+        <button style="--c:#A46BFF" aria-label="Violet"></button>
+      </div>
+      <p class="label">Corners</p>
+      <div class="seg" data-set="corners">
+        <button data-v="rounded" class="on">Rounded</button><button data-v="soft">Soft</button><button data-v="square">Square</button>
+      </div>
+      <label class="switch"><input type="checkbox" id="autoHide" checked><span></span>Slide away when not in use</label>
+      <ul class="points mini">
+        <li>Snaps to whichever screen edge is closest.</li>
+        <li>Hides behind a thin glowing strip. Touch it to bring the dock back.</li>
+        <li>Usage meters show the same numbers as <code>/usage</code>, read from Claude Code's own files.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 04 MORE -->
+<section class="feature" id="more">
+  <div class="feature-head">
+    <span class="num">04</span>
+    <h2>And she has a life of her own</h2>
+    <p>Small things that make the dock feel alive, all driven by what Claude Code and my PC are actually doing.</p>
+  </div>
+
+  <div class="cards">
+    <article class="card">
+      <div class="card-stage clones" id="cloneStage">
+        <canvas class="capri" id="cloneMain" aria-hidden="true"></canvas>
+      </div>
+      <h3>Helper clones</h3>
+      <p>When Claude Code starts subagents, a small clone of her steps in for each one and leaves when it's done.</p>
+      <button class="btn small" id="cloneBtn">Start 3 subagents</button>
+    </article>
+
+    <article class="card">
+      <div class="card-stage"><div class="ledge" aria-hidden="true"></div><canvas class="capri perch" id="musicCapri" aria-hidden="true"></canvas><div class="beat" id="beat" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>
+      <h3>She dances to my music</h3>
+      <p>She reads Windows' audio meters (nothing is recorded), finds the beat between 60 and 180 BPM, and sways on her window in time.</p>
+      <label class="range">tempo <input type="range" id="bpm" min="60" max="180" value="112"><output id="bpmOut">112 BPM</output></label>
+    </article>
+
+    <article class="card">
+      <div class="card-stage"><canvas class="capri" id="styleCapri" aria-hidden="true"></canvas></div>
+      <h3>Style her</h3>
+      <p>Hair and accent colours, a pixel-art look and outlines. The dock can match its accent to her. This slider recolours every Capri on the page.</p>
+      <label class="range">hue <input type="range" id="hue" min="0" max="360" value="0"><output id="hueOut">0°</output></label>
+    </article>
+
+    <article class="card">
+      <div class="card-stage"><canvas class="capri" id="glitchCapri" aria-hidden="true"></canvas></div>
+      <h3>She lives on my desktop</h3>
+      <p>She sits on window tops and the taskbar, falls when a window closes, and teleports with a ribbon trail. She stays out of the way of fullscreen games and videos.</p>
+      <p class="keys"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>H</kbd> hide or show &nbsp; <kbd>Ctrl</kbd>+scroll resize</p>
+    </article>
+  </div>
+</section>
+
+<!-- ============================================================ 05 BUILT -->
+<section class="feature built" id="built">
+  <div class="feature-head">
+    <span class="num">05</span>
+    <h2>How I built it</h2>
+    <p>I built the whole thing with Claude Code in a terminal. I described what I wanted, tested it on my own desktop, and kept going until it felt right. This site was made the same way.</p>
+  </div>
+  <div class="stats">
+    <div><b>~8,900</b><span>lines of C# 5 and XAML</span></div>
+    <div><b>0</b><span>installs: built by the C# compiler that ships with Windows</span></div>
+    <div><b>2</b><span>local AI models: one to listen, one to speak</span></div>
+    <div><b>9</b><span>Claude Code hook events the dock reacts to</span></div>
+  </div>
+  <div class="stack">
+    <span>C# 5 / .NET Framework 4.8</span><span>WPF</span><span>Win32 console + layered windows</span><span>GDI+</span><span>sherpa-onnx</span><span>Parakeet TDT</span><span>Kokoro TTS</span><span>Windows audio meters</span><span>Claude Code hooks</span>
+  </div>
+  <ul class="points">
+    <li><b>Hooks into Claude Code.</b> The dock adds itself to Claude Code's hooks in <code>settings.json</code> and leaves the rest of that file untouched. Claude Code runs <code>ClaudeDock.exe --hook</code>, which passes the event to the running dock and exits.</li>
+    <li><b>Reads Claude Code's own files.</b> It reads the session transcripts to find the chat I'm in, its title, how full its context window is, and my plan limits.</li>
+    <li><b>Smooth at any scale.</b> Her animation follows the screen's refresh rate, frames are prepared in the background at her exact size, and she stays the same size on monitors with different scaling.</li>
+  </ul>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p><b>Claude Dock</b> is my personal, non-commercial project. It isn't affiliated with or endorsed by Anthropic. Claude and Claude Code are Anthropic's.</p>
+  <p><b>Capri isn't my creation.</b> Her art, animations and voice setup come from the <a href="https://github.com/lachydotmcg/capri-desktop">Capri project</a>, used under the <a href="https://polyformproject.org/licenses/noncommercial/1.0.0">PolyForm Noncommercial License 1.0.0</a>. Capri is an unofficial fan project and isn't approved or endorsed by CD PROJEKT RED, the anime's rights holders or its voice actors.</p>
+  <p class="notice">Required Notice: Copyright 2026 Lachy (https://github.com/lachydotmcg)<br>
+  Required Notice: Anyone who uses Capri's code, art, animations or any of its other assets must credit the Capri project (https://github.com/lachydotmcg/capri-desktop). Capri's art and animations are by her artist, who prefers to stay private. Parts made by others keep their own licences, listed in its README.</p>
+  <p>Font: Share Tech Mono (SIL OFL). Voice in this page's demo: your browser's built-in speech.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
