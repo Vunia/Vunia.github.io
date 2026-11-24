@@ -452,7 +452,7 @@ function currentSection() {
   const mid = innerHeight * 0.5;
   return sections.find(s => { const r = s.getBoundingClientRect(); return r.top <= mid && r.bottom > mid; }) || sections[0];
 }
-const spotOf = sec => $('.spot', sec);
+const spotOf = sec => $(`.spot[data-spot="${sec.id}"]`);
 const currentSpot = () => spotOf(currentSection());
 function track() {
   const sec = currentSection();

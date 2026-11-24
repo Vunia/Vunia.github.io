@@ -19,9 +19,9 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: clip; }
 body {
-  margin: 0; color: var(--ink); font: 17px/1.55 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  margin: 0; color: var(--ink); font: 17px/1.55 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: clip;
   position: relative;
   /* the sky, from dusk at the top down into the evening city */
   background: linear-gradient(180deg, #c9b6ff 0%, #ffc2d4 9%, #ffd9b8 15%, #ffc8d6 24%, #e7b2e6 34%, #c4a0ef 46%, #9f86e8 60%, #7e63d6 74%, #5e43b8 88%, #4b3399 100%);
@@ -50,10 +50,11 @@ h1, h2, h3 { font-family: var(--mono); font-weight: 400; margin: 0; }
 @media (max-width: 700px) { .rail { display: none; } }
 
 /* ---------------------------------------------------------------- sections */
-.sec { position: relative; min-height: 100vh; padding: 130px clamp(18px, 6vw, 90px) 90px; overflow: hidden; }
+.sec { position: relative; z-index: 1; min-height: 100vh; padding: 130px clamp(34px, 11vw, 190px) 90px; overflow: hidden; }
 .scene { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 .wrap { position: relative; z-index: 2; max-width: 1120px; margin: 0 auto; }
-.one { font-size: clamp(18px, 2vw, 22px); margin: 18px 0 34px; max-width: 30em; }
+.one { display: table; font-size: clamp(18px, 2vw, 22px); margin: 18px 0 34px; max-width: 30em; padding: 6px 12px; margin-left: -12px; background: #ffffff8c; border-radius: 6px; backdrop-filter: blur(3px); }
+.hero .one, .built .one { background: none; backdrop-filter: none; padding: 0; margin-left: 0; }
 
 /* neon signs: a dark plate with a glowing word */
 .neon {
@@ -111,15 +112,12 @@ details.how li + li { margin-top: 6px; }
 .title.glitching { animation: tear .35s steps(2) 1; }
 @keyframes tear { 0% { transform: translateX(6px); clip-path: inset(0 0 55% 0); } 50% { transform: translateX(-6px); clip-path: inset(40% 0 0 0); } 100% { transform: none; clip-path: none; } }
 .hero .one { margin: 22px 0 30px; font-size: clamp(19px, 2.2vw, 24px); color: var(--ink2); }
-.tower { position: absolute; z-index: 1; right: clamp(40px, 12vw, 220px); bottom: 0; width: clamp(150px, 16vw, 230px); height: 44%; }
-.tower svg { width: 100%; height: 100%; display: block; }
 .spot { position: absolute; left: 0; right: 0; top: 0; height: 2px; pointer-events: none; }
 .scroll-cue { position: absolute; z-index: 2; left: 50%; bottom: 26px; width: 26px; height: 42px; border: 2px solid var(--ink); border-radius: 14px; transform: translateX(-50%); }
 .scroll-cue span { position: absolute; left: 50%; top: 8px; width: 4px; height: 8px; margin-left: -2px; border-radius: 2px; background: var(--red); animation: cue 1.6s ease-in-out infinite; }
 @keyframes cue { 50% { transform: translateY(12px); opacity: .3; } }
 @media (max-width: 760px) {
   .hero { align-items: flex-start; padding-top: 110px; }
-  .tower { right: 8%; height: 30%; width: 130px; }
   .scroll-cue { display: none; }
 }
 
@@ -170,8 +168,6 @@ details.how li + li { margin-top: 6px; }
 .beam::before, .beam::after { content: ""; position: absolute; top: 14px; width: 6px; height: 32px; background: #24123f; }
 .beam::before { left: 24px; } .beam::after { right: 24px; }
 .on-board { position: absolute; right: 16px; top: -40px; margin: 0; }
-.legs { position: absolute; left: 0; right: 0; bottom: -70px; height: 70px; display: flex; justify-content: space-around; }
-.legs i { width: 18px; background: #24123f; }
 .screen { position: relative; height: 560px; overflow: hidden; border-radius: 4px; user-select: none; background: #0b0b12; }
 .wall { position: absolute; inset: 0; background: linear-gradient(160deg, #2a1f55, #120d26); }
 .wall::before { content: ""; position: absolute; right: 8%; top: 10%; width: 40%; height: 60%; background: #ff004633; clip-path: polygon(20% 0, 100% 10%, 80% 100%, 0 70%); }
@@ -281,3 +277,60 @@ details.how li + li { margin-top: 6px; }
   html { scroll-behavior: auto; }
   .drone, .steam, .flick, .blink, .scroll-cue span { animation: none; }
 }
+
+/* ---------------------------------------------------------------- the world: one city you move down through */
+main { position: relative; }
+.world { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.far { position: fixed; left: 0; right: 0; bottom: 0; height: 30vh; z-index: 0; pointer-events: none; will-change: transform, opacity; }
+.far svg { width: 100%; height: 100%; display: block; }
+.far-dark { opacity: 0; }
+
+.bldg { position: absolute; --w: clamp(18px, 7.5vw, 120px); width: var(--w); background-color: var(--c); }
+.bldg-r { --c: #3a2470; right: clamp(0px, 1.2vw, 20px); }
+.bldg-l { --c: #4b3399; left: 0; }
+.bldg::before { content: ""; position: absolute; inset: 0; background: var(--tile) 0 0 / 100% auto repeat-y; }
+.bldg::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 34%; background: #000; opacity: .2; pointer-events: none; }
+.cap { position: absolute; z-index: 1; left: -6px; right: -6px; top: -16px; height: 16px; background: var(--c); clip-path: polygon(0 100%, 6% 0, 70% 0, 100% 40%, 100% 100%); }
+.cap-wrap { position: absolute; left: 0; right: 0; top: 0; }
+.cap .spot { top: 0; }
+.ant { position: absolute; z-index: 1; left: 30%; top: -70px; width: 3px; height: 56px; background: #24123f; }
+.ant::after { content: ""; position: absolute; left: -3px; top: -6px; width: 9px; height: 9px; border-radius: 50%; background: var(--red); animation: blink 1.6s steps(1) infinite; }
+.bldg-l .ant { left: 72%; top: -86px; height: 72px; }
+.tank { position: absolute; z-index: 1; left: 10%; top: -62px; width: 44%; height: 48px; background: #24123f; clip-path: polygon(0 26%, 50% 0, 100% 26%, 100% 100%, 86% 100%, 86% 84%, 14% 84%, 14% 100%, 0 100%); }
+.dish { position: absolute; z-index: 1; left: 52%; top: -40px; width: 34px; height: 26px; background: #24123f; clip-path: polygon(0 0, 100% 40%, 60% 100%, 46% 60%); }
+.vsign { position: absolute; z-index: 1; left: -32px; top: 40px; width: 28px; height: 236px; }
+.pipe { position: absolute; z-index: 1; left: 12%; top: 0; bottom: 0; width: 6px; background: #24123f; opacity: .55; }
+.escape { position: absolute; z-index: 1; right: -26px; width: 26px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='70'%3E%3Crect width='26' height='3' fill='%2324123f'/%3E%3Cline x1='3' y1='3' x2='23' y2='70' stroke='%2324123f' stroke-width='2'/%3E%3Cline x1='25' y1='0' x2='25' y2='70' stroke='%2324123f' stroke-width='2'/%3E%3C/svg%3E") repeat-y; }
+.deco { position: absolute; z-index: 1; }
+.ac { width: 30px; height: 20px; background: #24123f; }
+.ac::after { content: ""; position: absolute; inset: 4px 6px 8px; background: repeating-linear-gradient(90deg, #ffffff30 0 2px, transparent 2px 5px); }
+.bldg-r .ac { left: -30px; } .bldg-l .ac { right: -30px; }
+.mini-sign { --n: var(--red); padding: 3px 7px; font: 12px var(--mono); color: #fff; background: #24123f; text-shadow: 0 0 6px var(--n), 0 0 12px var(--n); box-shadow: 0 0 0 1.5px var(--n), 0 0 10px var(--n); white-space: nowrap; }
+.bldg-r .mini-sign { right: calc(100% + 8px); } .bldg-l .mini-sign { left: calc(100% + 8px); }
+.vent { width: 40px; height: 14px; background: #24123f; }
+.bldg-r .vent { left: -40px; }
+.vent::before { content: ""; position: absolute; left: 6px; bottom: 100%; width: 24px; height: 90px; background: linear-gradient(transparent, #ffffff80); clip-path: polygon(30% 100%, 70% 100%, 100% 60%, 60% 30%, 90% 0, 20% 0, 50% 30%, 0 60%); animation: steam 3s ease-in-out infinite; transform-origin: bottom; }
+.wire { position: absolute; overflow: visible; }
+.wire path { fill: none; stroke: #24123f; stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.bulb { position: absolute; width: 9px; height: 11px; margin-left: -4px; border-radius: 50% 50% 45% 45%; background: var(--b); box-shadow: 0 0 10px var(--b); animation: blink 2.4s steps(1) infinite; animation-delay: var(--d, 0s); }
+.hang { position: absolute; transform: translateX(-50%); margin-top: 18px; }
+.hang::before { content: ""; position: absolute; left: 50%; bottom: 100%; width: 2px; height: 18px; background: #24123f; }
+
+/* the street: a sidewalk and road the buildings stand on, running into the corridor below */
+.street { padding-bottom: 0; }
+.sidewalk { position: relative; height: 150px; margin: 70px calc(-1 * clamp(34px, 11vw, 190px)) 0; background: #2e1d66; }
+.sidewalk::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 26px; background: #5a3bb5; box-shadow: inset 0 -5px 0 #24123f; }
+.lamp { position: absolute; bottom: calc(100% - 26px); width: 7px; height: 220px; background: #24123f; }
+.lamp::before { content: ""; position: absolute; top: 0; left: -14px; width: 36px; height: 10px; background: #24123f; clip-path: polygon(0 0, 100% 0, 85% 100%, 15% 100%); }
+.lamp::after { content: ""; position: absolute; top: 10px; left: -40px; width: 88px; height: 210px; background: #fff3b0; opacity: .2; clip-path: polygon(36% 0, 64% 0, 100% 100%, 0 100%); }
+.puddle { position: absolute; top: 64px; width: 120px; height: 8px; background: var(--p); opacity: .55; clip-path: polygon(8% 0, 100% 10%, 90% 100%, 0 80%); }
+.grate { position: absolute; top: 44px; width: 70px; height: 16px; background: repeating-linear-gradient(90deg, #24123f 0 4px, #0000 4px 9px); opacity: .8; }
+.built::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 40px; background: #2e1d66; z-index: 1; }
+
+/* the "Capri says" sign and the billboard hang off the buildings */
+.board::after { content: ""; position: absolute; left: 100%; top: 26px; width: 60vw; height: 10px; background: #24123f; z-index: -1; box-shadow: 0 30px 0 #24123f; }
+.billboard::before, .billboard::after { content: ""; position: absolute; top: 40px; width: 60vw; height: 26px; z-index: -1;
+  background: repeating-linear-gradient(60deg, #24123f 0 3px, transparent 3px 22px), repeating-linear-gradient(-60deg, #24123f 0 3px, transparent 3px 22px); border-top: 4px solid #24123f; border-bottom: 4px solid #24123f; }
+.billboard::before { right: 100%; } .billboard::after { left: 100%; }
+@media (max-width: 760px) { .vsign, .tank, .dish { display: none; } .ac, .mini-sign, .vent { display: none; } }
